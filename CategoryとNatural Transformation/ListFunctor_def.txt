@@ -1,0 +1,27 @@
+-- ListFunctor の定義
+ListFunctor : Functor Sets Sets
+ListFunctor = record
+  { FObj = λ x → List x
+  ; FMap = fmap
+  ; isFunctor = record
+      { identity = identity
+      ; distr = distr
+      }
+  }
+  where
+    fmap : {A B : Set} → (A → B) → List A → List B
+    fmap f [] = []
+    fmap f (x :: xs) = (f x) :: fmap f xs
+
+    identity : {A : Set} (x : List A) → fmap (id A) x ≡ id (List A) x
+    identity {A} [] = refl
+    identity {A} (h :: t) = cong (λ l → h :: l) (identity t)
+
+    distr : {a b c : Set} {f : a → b} {g : b → c} (x : List a) →
+            fmap (g ∘ f) x ≡ fmap g (fmap f x)
+    distr [] = refl
+    distr (h :: t) = begin
+      fmap (g ∘ f) (h :: t)
+      ≡⟨ congr (λ l → g (f h) :: l) (distr t) ⟩
+      fmap g (fmap f (h :: t))
+    end
